@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - main
 
 permissions:
   contents: write
@@ -19,22 +20,55 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: '16' # 指定一个具体的版本号
 
       - name: Install dependencies
         run: npm install
 
       - name: Build project
         run: |
-          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-10-26 --dry-run --outdir=dist
-          npx javascript-obfuscator dist/worker.js --output _worker.js
+          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-11-27 --dry-run --outdir=dist                              
 
-      - name: Commit and push built worker
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Tag
+        id: create_tag
         run: |
-          git config --global user.name "github-actions[bot]"
+          tagName="v$(date +%Y%m%d%H%M%S)"
+          echo "Created tag: $tagName"
+          echo "::set-output name=TAG_NAME::$tagName"
+
+      - name: Push Tag
+        run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add _worker.js
-          git commit -m "Automated build: update _worker.js"
-          git push
+          git config --global user.name "github-actions[bot]"
+          git tag "$(echo${{ steps.create_tag.outputs.TAG_NAME }})"
+          git push origin "$(echo${{ steps.create_tag.outputs.TAG_NAME }})"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
+          release_name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/worker.js
+          asset_name: worker.js
+          asset_content_type: application/javascript
