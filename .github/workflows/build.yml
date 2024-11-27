@@ -1,4 +1,4 @@
-name: Build 和 Deploy Worker    
+name: Build and Deploy Worker
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest' # 指定一个具体的版本号
+          node-version: '16' # 指定一个具体的版本号
 
       - name: Install dependencies
         run: npm install
@@ -28,24 +28,25 @@ jobs:
       - name: Build project
         run: |
           mkdir -p dist
-          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-11-27 --dry-run --outdir=dist
+          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
+          # 确认 dist/worker.js 文件存在
           ls -l dist/worker.js
-          
+
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4  
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
 
       - name: Create Tag
         id: create_tag
         run: |
-          tagName="v$(date +%Y%m%d%H%M%S)"  
-          echo "Created tag: $tagName"  
-          echo "::set-output name=TAG_NAME::$tagName"  
+          tagName="v$(date +%Y%m%d%H%M%S)"
+          echo "Created tag: $tagName"
+          echo "::set-output name=TAG_NAME::$tagName"
 
       - name: Push Tag
         run: |
@@ -53,8 +54,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git tag "${{ steps.create_tag.outputs.TAG_NAME }}"
           git push origin "${{ steps.create_tag.outputs.TAG_NAME }}"
-          
-      - name: Create Release  
+
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -65,12 +66,19 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Check if worker.js exists
+        run: |
+          if [ ! -f dist/worker.js ]; then
+            echo "worker.js not found"
+            exit 1
+          fi
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/worker.js
+          asset_path: dist/worker.js
           asset_name: worker.js
           asset_content_type: application/javascript
