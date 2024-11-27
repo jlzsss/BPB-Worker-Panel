@@ -38,8 +38,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create Tag  
-        id: create_tag  
+      - name: Create Tag
+        id: create_tag
         run: |
           tagName="v$(date +%Y%m%d%H%M%S)"  
           echo "Created tag: $tagName"  
