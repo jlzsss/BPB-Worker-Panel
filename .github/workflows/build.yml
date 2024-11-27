@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: write  
 
 jobs:
   build:
@@ -27,16 +27,25 @@ jobs:
 
       - name: Build project
         run: |
-          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-11-27 --dry-run --outdir=dist
-  
+          mkdir -p dist
+          npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-11-27 --dry-run --outdir=dist    
+          ls -l dist/worker.js
+          
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  
         with:
-          fetch-depth: 0
+          fetch-depth: 0  
+
+      - name: Check if worker.js exists
+        run: |
+          if [ ! -f dist/worker.js ]; then
+            echo "worker.js not found"
+            exit 1
+          fi
 
       - name: Create Tag
         id: create_tag
