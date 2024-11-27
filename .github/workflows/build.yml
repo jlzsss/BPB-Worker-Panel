@@ -1,4 +1,4 @@
-name: Build 和 Deploy Worker
+name: Build 和 Deploy Worker    
 
 on:
   push:
@@ -18,9 +18,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4  
         with:
-          node-version: '16' # 指定一个具体的版本号
+          node-version: 'latest' # 指定一个具体的版本号
 
       - name: Install dependencies
         run: npm install
@@ -39,13 +39,6 @@ jobs:
         uses: actions/checkout@v4  
         with:
           fetch-depth: 0  
-
-      - name: Check if worker.js exists
-        run: |
-          if [ ! -f dist/worker.js ]; then
-            echo "worker.js not found"
-            exit 1
-          fi
 
       - name: Create Tag
         id: create_tag
