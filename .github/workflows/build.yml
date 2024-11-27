@@ -32,15 +32,6 @@ jobs:
           # 确认 dist/worker.js 文件存在
           ls -l dist/worker.js
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Create Tag
         id: create_tag
         run: |
