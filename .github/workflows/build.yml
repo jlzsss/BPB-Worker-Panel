@@ -29,12 +29,12 @@ jobs:
         run: |
           mkdir -p dist
           npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
-          # npx javascript-obfuscator dist/worker.js --output dist/workers.js
+          npx javascript-obfuscator dist/worker.js --output dist/workers.js
 
-      - name: Check if worker.js exists
+      - name: Check if workers.js exists
         run: |
-          if [ ! -f dist/worker.js ]; then
-            echo "worker.js not found"
+          if [ ! -f dist/workers.js ]; then
+            echo "workers.js not found"
             exit 1
           fi
 
@@ -69,7 +69,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/worker.js
-          asset_name: worker.js
+          asset_path: dist/workers.js
+          asset_name: workers.js
           asset_content_type: application/javascript
           
