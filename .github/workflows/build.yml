@@ -25,25 +25,25 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
+      - name: Build project  
         run: |
           mkdir -p dist
           npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
-          # 确认 dist/worker.js 文件存在
-          ls -l dist/worker.js
+          npx javascript-obfuscator dist/worker.js --output _worker.js  
+          ls -l dist/_worker.js      
 
       - name: Create Tag
         id: create_tag
         run: |
           tagName="v$(date +%Y%m%d%H%M%S)"
           echo "Created tag: $tagName"
-          echo "::set-output name=TAG_NAME::$tagName"
+          echo "::set-output name=TAG_NAME::$tagName"    
 
       - name: Push Tag
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"  
           git config --global user.name "github-actions[bot]"
-          git tag "${{ steps.create_tag.outputs.TAG_NAME }}"
+          git tag "${{ steps.create_tag.outputs.TAG_NAME }}"  
           git push origin "${{ steps.create_tag.outputs.TAG_NAME }}"
 
       - name: Create Release
@@ -57,10 +57,10 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Check if worker.js exists
+      - name: Check if worker.js exists  
         run: |
-          if [ ! -f dist/worker.js ]; then
-            echo "worker.js not found"
+          if [ ! -f dist/_worker.js ]; then    
+            echo "_worker.js not found"  
             exit 1
           fi
 
@@ -70,6 +70,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/worker.js
-          asset_name: worker.js
+          asset_path: dist/_worker.js    
+          asset_name: _worker.js    
           asset_content_type: application/javascript
