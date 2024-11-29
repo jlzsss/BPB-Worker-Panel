@@ -27,9 +27,9 @@ jobs:
 
       - name: Build project
         run: |
+          mkdir -p dist
           npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
           npx javascript-obfuscator dist/worker.js --output _worker.js
-          ls -l dist/_worker.js
 
       - name: Create Tag
         id: create_tag
