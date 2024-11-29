@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16' # 指定一个具体的版本号
+          node-version: 'latest' # 指定一个具体的版本号
 
       - name: Install dependencies
         run: npm install
@@ -56,7 +56,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Check if worker.js exists
+      - name: Check if workers.js exists
         run: |
           if [ ! -f dist/workers.js ]; then
             echo "workers.js not found"
