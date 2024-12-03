@@ -21,7 +21,7 @@ export async function getNormalConfigs(request, env) {
     const Addresses = await getConfigAddresses(cleanIPs, enableIPv6);
     const customCdnAddresses = customCdnAddrs ? customCdnAddrs.split(',') : [];
     const totalAddresses = [...Addresses, ...customCdnAddresses];
-    const alpn = globalThis.client === 'singbox' ? 'http/1.1' : 'h2,http/1.1';
+    const alpn = 'http/1.1';
     const trojanPass = encodeURIComponent(globalThis.trojanPassword);
     const earlyData = globalThis.client === 'singbox' 
         ? '&eh=Sec-WebSocket-Protocol&ed=2560' 
