@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p dist
           npx wrangler deploy src/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
-          npx javascript-obfuscator dist/worker.js --output dist/workers.js --compact true --string-array true --string-array-encoding rc4 --identifierNamesGenerator hexadecimal --rotateStringArray true --selfDefending true --unicodeEscapeSequence true
+          npx javascript-obfuscator dist/worker.js --output dist/workers.js --compact true --string-array true --string-array-encoding rc4 --rotateStringArray true --selfDefending true --unicodeEscapeSequence true
           #  npx javascript-obfuscator dist/worker.js --output dist/workers.js
 
       - name: Check if workers.js exists
