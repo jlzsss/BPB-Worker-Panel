@@ -28,14 +28,11 @@ jobs:
       - name: Build vless
         run: |
           mkdir -p dist
-          npx wrangler deploy src/vless.js --name vless --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
+          npx wrangler deploy src/vless.js --name vless --dry-run --outdir=dist
           npx javascript-obfuscator dist/vless.js --output dist/vlesss.js --compact true --string-array true --string-array-encoding rc4 --control-flow-flattening true --numbers-to-expressions true
-        
-      - name: Build trojan
-        run: |
-          npx wrangler deploy src/trojan.js --name trojan --compatibility-flag [nodejs_compat] --compatibility-date "2024-11-27" --dry-run --outdir=dist
+          npx wrangler deploy src/trojan.js --name trojan --dry-run --outdir=dist
           npx javascript-obfuscator dist/trojan.js --output dist/trojans.js --compact true --string-array true --string-array-encoding rc4 --control-flow-flattening true --numbers-to-expressions true
-
+      
       - name: Create Tag
         id: create_tag
         run: |
