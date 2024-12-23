@@ -28,9 +28,9 @@ jobs:
       - name: Build Project
         run: |
           mkdir -p dist
-          npx wrangler publish src/vless.js --name vless --compatibility-date 2024-12-21 --outdir=dist
+          npx wrangler deploy src/vless.js --name vless --compatibility-date 2024-12-21 --dry-run --outdir=dist
           npx javascript-obfuscator dist/vless.js --output dist/vlesss.js --compact true --string-array true --string-array-encoding rc4 --control-flow-flattening true --numbers-to-expressions true
-          npx wrangler publish src/trojan.js --name trojan --compatibility-date 2024-12-22 --outdir=dist --node-compat
+          npx wrangler deploy src/trojan.js --name trojan --compatibility-date 2024-12-22 --dry-run --outdir=dist --node-compat
           npx javascript-obfuscator dist/trojan.js --output dist/trojans.js --compact true --string-array true --string-array-encoding rc4 --control-flow-flattening true --numbers-to-expressions true
 
       - name: Create Tag
