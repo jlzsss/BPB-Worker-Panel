@@ -28,7 +28,7 @@ jobs:
       - name: Build Project
         run: |
           mkdir -p dist
-          javascript-obfuscator src/明文源码.js --output dist/秘钥.js \
+          javascript-obfuscator src/cesu.js --output dist/cesu.js \
           --compact true \
           --control-flow-flattening true \
           --control-flow-flattening-threshold 1 \
