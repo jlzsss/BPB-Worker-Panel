@@ -47,8 +47,7 @@ let parsedSocks5Address = {};
 let enableSocks = false;
 
 /**
- * Main handler for the Cloudflare Worker. Processes incoming requests and routes them appropriately.  
-
+ * Main handler for the Cloudflare Worker. Processes incoming requests and routes them appropriately.
  * @param {import("@cloudflare/workers-types").Request} request - The incoming request object
  * @param {Object} env - Environment variables containing configuration
  * @param {string} env.UUID - User ID for authentication
@@ -87,17 +86,14 @@ export default {
 				}
 			}
 
-			const userIDs = userID.includes(',') ?  
- userID.split(',').map(id => id.trim()) : [userID];
+			const userIDs = userID.includes(',') ? userID.split(',').map(id => id.trim()) : [userID];
 			const url = new URL(request.url);
 			const host = request.headers.get('Host');
 			const requestedPath = url.pathname.substring(1); // Remove leading slash
-			const matchingUserID = userIDs.length === 1 ?  
-
+			const matchingUserID = userIDs.length === 1 ?
 				(requestedPath === userIDs[0] || 
 				 requestedPath === `sub/${userIDs[0]}` || 
-				 requestedPath === `bestip/${userIDs[0]}` ?  
- userIDs[0] : null) :
+				 requestedPath === `bestip/${userIDs[0]}` ? userIDs[0] : null) :
 				userIDs.find(id => {
 					const patterns = [id, `sub/${id}`, `bestip/${id}`];
 					return patterns.some(pattern => requestedPath.startsWith(pattern));
@@ -114,8 +110,7 @@ export default {
 				if (matchingUserID) {
 					if (url.pathname === `/${matchingUserID}` || url.pathname === `/sub/${matchingUserID}`) {
 						const isSubscription = url.pathname.startsWith('/sub/');
-						const proxyAddresses = PROXYIP ?  
- PROXYIP.split(',').map(addr => addr.trim()) : proxyIP;
+						const proxyAddresses = PROXYIP ? PROXYIP.split(',').map(addr => addr.trim()) : proxyIP;
 						const content = isSubscription ?
 							GenSub(matchingUserID, host, proxyAddresses) :
 							getConfig(matchingUserID, host, proxyAddresses);
@@ -123,14 +118,13 @@ export default {
 						return new Response(content, {
 							status: 200,
 							headers: {
-								"Content-Type": isSubscription ?  
-
+								"Content-Type": isSubscription ?
 									"text/plain;charset=utf-8" :
 									"text/html; charset=utf-8"
 							},
 						});
 					} else if (url.pathname === `/bestip/${matchingUserID}`) {
-						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${matchingUserID}&path=/`, { headers: request.headers });
+						return fetch(`https://bestip.06151953.xyz/auto?host=${host}&uuid=${matchingUserID}&path=/`, { headers: request.headers });
 					}
 				}
 				return handleDefaultPath(url, request);
@@ -145,8 +139,7 @@ export default {
 
 /**
  * Handles default path requests when no specific route matches.
- * Generates and returns a cloud drive interface HTML page.  
-
+ * Generates and returns a cloud drive interface HTML page.
  * @param {URL} url - The URL object of the request
  * @param {Request} request - The incoming request object
  * @returns {Response} HTML response with cloud drive interface
@@ -272,8 +265,7 @@ async function handleDefaultPath(url, request) {
 	  <body>
 		  <div class="container">
 			  <h1>Cloud Drive</h1>
-			  <p>Welcome to your personal cloud storage.  
- Here are your uploaded files:</p>
+			  <p>Welcome to your personal cloud storage. Here are your uploaded files:</p>
 			  <button id="clearAllBtn" class="clear-all-btn">Clear All Files</button>
 			  <ul id="fileList" class="file-list">
 			  </ul>
@@ -374,8 +366,7 @@ async function handleDefaultPath(url, request) {
 					  }
 
 					  const result = await response.json();
-					  uploadStatus.textContent = \`File uploaded successfully!  
- IPFS Hash: \${result.Hash}\`;
+					  uploadStatus.textContent = \`File uploaded successfully! IPFS Hash: \${result.Hash}\`;
 					  
 					  const savedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
 					  savedFiles.push(result);
@@ -385,8 +376,7 @@ async function handleDefaultPath(url, request) {
 					  
 				  } catch (error) {
 					  console.error('Error:', error);
-					  uploadStatus.textContent = 'Upload failed.  
- Please try again.';
+					  uploadStatus.textContent = 'Upload failed. Please try again.';
 				  }
 			  }
 		  </script>
@@ -403,8 +393,7 @@ async function handleDefaultPath(url, request) {
 }
 
 /**
- * Handles protocol over WebSocket requests by creating a WebSocket pair, accepting the WebSocket connection, and processing the protocol header.  
-
+ * Handles protocol over WebSocket requests by creating a WebSocket pair, accepting the WebSocket connection, and processing the protocol header.
  * @param {import("@cloudflare/workers-types").Request} request - The incoming request object
  * @returns {Promise<Response>} WebSocket response
  */
@@ -456,8 +445,7 @@ async function ProtocolOverWSHandler(request) {
 				isUDP,
 			} = ProcessProtocolHeader(chunk, userID);
 			address = addressRemote;
-			portWithRandomLog = `${portRemote}--${Math.random()} ${isUDP ?  
- 'udp ' : 'tcp '
+			portWithRandomLog = `${portRemote}--${Math.random()} ${isUDP ? 'udp ' : 'tcp '
 				} `;
 			if (hasError) {
 				// controller.error(message);
@@ -500,8 +488,7 @@ async function ProtocolOverWSHandler(request) {
 
 /**
  * Handles outbound TCP connections for the proxy.
- * Establishes connection to remote server and manages data flow.  
-
+ * Establishes connection to remote server and manages data flow.
  * @param {Socket} remoteSocket - Remote socket connection
  * @param {string} addressType - Type of address (IPv4/IPv6)
  * @param {string} addressRemote - Remote server address
@@ -518,8 +505,7 @@ async function HandleTCPOutBound(remoteSocket, addressType, addressRemote, portR
 		if (socks5Relay) {
 			tcpSocket = await socks5Connect(addressType, address, port, log)
 		} else {
-			tcpSocket = socks ?  
- await socks5Connect(addressType, address, port, log)
+			tcpSocket = socks ? await socks5Connect(addressType, address, port, log)
 				: connect({
 					hostname: address,
 					port: port,
@@ -558,8 +544,7 @@ async function HandleTCPOutBound(remoteSocket, addressType, addressRemote, portR
 
 /**
  * Creates a readable stream from WebSocket server.
- * Handles early data and WebSocket messages.  
-
+ * Handles early data and WebSocket messages.
  * @param {WebSocket} webSocketServer - WebSocket server instance
  * @param {string} earlyDataHeader - Header for early data (0-RTT)
  * @param {Function} log - Logging function
@@ -608,8 +593,7 @@ function MakeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
 
 /**
  * Processes VLESS protocol header.
- * Extracts and validates protocol information from buffer.  
-
+ * Extracts and validates protocol information from buffer.
  * @param {ArrayBuffer} protocolBuffer - Buffer containing protocol header
  * @param {string} userID - User ID for validation
  * @returns {Object} Processed header information
@@ -682,8 +666,7 @@ function ProcessProtocolHeader(protocolBuffer, userID) {
 
 /**
  * Converts remote socket connection to WebSocket.
- * Handles data transfer between socket and WebSocket.  
-
+ * Handles data transfer between socket and WebSocket.
  * @param {Socket} remoteSocket - Remote socket connection
  * @param {WebSocket} webSocket - WebSocket connection
  * @param {ArrayBuffer} protocolResponseHeader - Protocol response header
@@ -711,8 +694,7 @@ async function RemoteSocketToWS(remoteSocket, webSocket, protocolResponseHeader,
 					}
 				},
 				close() {
-					log(`Remote connection readable closed.  
- Had incoming data: ${hasIncomingData}`);
+					log(`Remote connection readable closed. Had incoming data: ${hasIncomingData}`);
 				},
 				abort(reason) {
 					console.error(`Remote connection readable aborted:`, reason);
@@ -731,8 +713,7 @@ async function RemoteSocketToWS(remoteSocket, webSocket, protocolResponseHeader,
 }
 
 /**
- * Converts base64 string to ArrayBuffer.  
-
+ * Converts base64 string to ArrayBuffer.
  * @param {string} base64Str - Base64 encoded string
  * @returns {Object} Object containing decoded data or error
  */
@@ -758,8 +739,7 @@ function base64ToArrayBuffer(base64Str) {
 }
 
 /**
- * Validates UUID format.  
-
+ * Validates UUID format.
  * @param {string} uuid - UUID string to validate
  * @returns {boolean} True if valid UUID
  */
@@ -774,8 +754,7 @@ const WS_READY_STATE_CLOSING = 2;
 
 /**
  * Safely closes WebSocket connection.
- * Prevents exceptions during WebSocket closure.  
-
+ * Prevents exceptions during WebSocket closure.
  * @param {WebSocket} socket - WebSocket to close
  */
 function safeCloseWebSocket(socket) {
@@ -791,8 +770,7 @@ function safeCloseWebSocket(socket) {
 const byteToHex = Array.from({ length: 256 }, (_, i) => (i + 0x100).toString(16).slice(1));
 
 /**
- * Converts byte array to hex string without validation.  
-
+ * Converts byte array to hex string without validation.
  * @param {Uint8Array} arr - Byte array to convert
  * @param {number} offset - Starting offset
  * @returns {string} Hex string
@@ -823,8 +801,7 @@ function unsafeStringify(arr, offset = 0) {
 }
 
 /**
- * Safely converts byte array to hex string with validation.  
-
+ * Safely converts byte array to hex string with validation.
  * @param {Uint8Array} arr - Byte array to convert
  * @param {number} offset - Starting offset
  * @returns {string} Hex string
@@ -839,16 +816,14 @@ function stringify(arr, offset = 0) {
 
 /**
  * Handles DNS query through UDP.
- * Processes DNS requests and forwards them.  
-
+ * Processes DNS requests and forwards them.
  * @param {ArrayBuffer} udpChunk - UDP data chunk
  * @param {WebSocket} webSocket - WebSocket connection
  * @param {ArrayBuffer} protocolResponseHeader - Protocol response header
  * @param {Function} log - Logging function
  */
 async function handleDNSQuery(udpChunk, webSocket, protocolResponseHeader, log) {
-	// no matter which DNS server client send, we alwasy use hard code one.  
-
+	// no matter which DNS server client send, we alwasy use hard code one.
 	// beacsue someof DNS server is not support DNS over TCP
 	try {
 		const dnsServer = '8.8.4.4'; // change to 1.1.1.1 after cf fix connect own ip bug
@@ -891,8 +866,7 @@ async function handleDNSQuery(udpChunk, webSocket, protocolResponseHeader, log) 
 }
 
 /**
- * Establishes SOCKS5 proxy connection.  
-
+ * Establishes SOCKS5 proxy connection.
  * @param {number} addressType - Type of address
  * @param {string} addressRemote - Remote address
  * @param {number} portRemote - Remote port
@@ -1032,8 +1006,7 @@ async function socks5Connect(addressType, addressRemote, portRemote, log) {
 }
 
 /**
- * Parses SOCKS5 address string.  
-
+ * Parses SOCKS5 address string.
  * @param {string} address - SOCKS5 address string
  * @returns {Object} Parsed address information
  */
@@ -1070,8 +1043,7 @@ const pt = 'dmxlc3M=';
 const ed = 'RUR0dW5uZWw=';
 
 /**
- * Generates configuration for VLESS client.  
-
+ * Generates configuration for VLESS client.
  * @param {string} userIDs - Single or comma-separated user IDs
  * @param {string} hostName - Host name for configuration
  * @param {string|string[]} proxyIP - Proxy IP address or array of addresses
@@ -1228,9 +1200,7 @@ function getConfig(userIDs, hostName, proxyIP) {
     <div class="container">
       <h1>EDtunnel: Protocol Configuration</h1>
       <img src="https://cdn.jsdelivr.net/gh/6Kmfi6HP/EDtunnel@refs/heads/main/image/logo.png" alt="EDtunnel Logo" class="logo">
-      <p>Welcome!  
- This function generates configuration for the vless protocol.  
- If you found this useful, please check our GitHub project:</p>
+      <p>Welcome! This function generates configuration for the vless protocol. If you found this useful, please check our GitHub project:</p>
       <p><a href="https://github.com/6Kmfi6HP/EDtunnel" target="_blank" style="color: #00ff00;">EDtunnel - https://github.com/6Kmfi6HP/EDtunnel</a></p>
       <div style="clear: both;"></div>
       <div class="btn-group">
@@ -1242,16 +1212,12 @@ function getConfig(userIDs, hostName, proxyIP) {
       <div class="subscription-info">
         <h3>Options Explained:</h3>
         <ul>
-          <li><strong>VLESS Subscription:</strong> Direct link for VLESS protocol configuration.  
- Suitable for clients supporting VLESS.</li>
-          <li><strong>Clash Subscription:</strong> Opens the Clash client with pre-configured settings.  
- Best for Clash users on mobile devices.</li>
-          <li><strong>Clash Link:</strong> A web link to convert the VLESS config to Clash format.  
- Useful for manual import or troubleshooting.</li>
+          <li><strong>VLESS Subscription:</strong> Direct link for VLESS protocol configuration. Suitable for clients supporting VLESS.</li>
+          <li><strong>Clash Subscription:</strong> Opens the Clash client with pre-configured settings. Best for Clash users on mobile devices.</li>
+          <li><strong>Clash Link:</strong> A web link to convert the VLESS config to Clash format. Useful for manual import or troubleshooting.</li>
           <li><strong>Best IP Subscription:</strong> Provides a curated list of optimal server IPs for many <b>different countries</b>.</li>
         </ul>
-        <p>Choose the option that best fits your client and needs.  
- For most users, the VLESS or Clash Subscription will be the easiest to use.</p>
+        <p>Choose the option that best fits your client and needs. For most users, the VLESS or Clash Subscription will be the easiest to use.</p>
       </div>
     </div>
   `;
@@ -1267,12 +1233,11 @@ function getConfig(userIDs, hostName, proxyIP) {
           <pre><code>${protocolMain}</code></pre>
           <button class="btn copy-btn" onclick='copyToClipboard("${protocolMain}")'><i class="fas fa-copy"></i> Copy</button>
         </div>
-
+        
         <h3>Best IP Configuration</h3>
         <div class="input-group mb-3">
           <select class="form-select" id="proxySelect" onchange="updateProxyConfig()">
-            ${typeof proxyIP === 'string' ?  
- 
+            ${typeof proxyIP === 'string' ? 
               `<option value="${proxyIP}">${proxyIP}</option>` : 
               Array.from(proxyIP).map(proxy => `<option value="${proxy}">${proxy}</option>`).join('')}
           </select>
@@ -1324,8 +1289,7 @@ const HttpPort = new Set([80, 8080, 8880, 2052, 2086, 2095, 2082]);
 const HttpsPort = new Set([443, 8443, 2053, 2096, 2087, 2083]);
 
 /**
- * Generates subscription content.  
-
+ * Generates subscription content.
  * @param {string} userID_path - User ID path
  * @param {string} hostname - Host name
  * @param {string|string[]} proxyIP - Proxy IP address or array of addresses
@@ -1372,8 +1336,7 @@ function GenSub(userID_path, hostname, proxyIP) {
 	]);
 
 	const userIDArray = userID_path.includes(',') ? userID_path.split(",") : [userID_path];
-	const proxyIPArray = Array.isArray(proxyIP) ? proxyIP : (proxyIP ? (proxyIP.includes(',') ?  
- proxyIP.split(',') : [proxyIP]) : proxyIPs);
+	const proxyIPArray = Array.isArray(proxyIP) ? proxyIP : (proxyIP ? (proxyIP.includes(',') ? proxyIP.split(',') : [proxyIP]) : proxyIPs);
 	const randomPath = () => '/' + Math.random().toString(36).substring(2, 15) + '?ed=2048';
 	const commonUrlPartHttp = `?encryption=none&security=none&fp=random&type=ws&host=${hostname}&path=${encodeURIComponent(randomPath())}#`;
 	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
@@ -1427,8 +1390,7 @@ function handleProxyConfig(PROXYIP) {
 		const [ip, port = '443'] = selectedProxy.split(':');
 		return { ip, port };
 	} else {
-		const port = proxyIP.includes(':') ?  
- proxyIP.split(':')[1] : '443';
+		const port = proxyIP.includes(':') ? proxyIP.split(':')[1] : '443';
 		const ip = proxyIP.split(':')[0];
 		return { ip, port };
 	}
@@ -1440,10 +1402,8 @@ function handleProxyConfig(PROXYIP) {
  * @returns {string} Selected address
  */
 function selectRandomAddress(addresses) {
-	const addressArray = typeof addresses === 'string' ?  
-
+	const addressArray = typeof addresses === 'string' ?
 		addresses.split(',').map(addr => addr.trim()) :
 		addresses;
 	return addressArray[Math.floor(Math.random() * addressArray.length)];
 }
-
